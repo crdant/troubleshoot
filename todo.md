@@ -6,20 +6,20 @@
   - [x] Update go.mod and go.sum files
   - [x] Test basic Cosign functionality
 
-- [ ] Create API Types
-  - [ ] Add ImageSignatures collector type in collector_shared.go
-  - [ ] Add ImageSignatures analyzer type in analyzer_shared.go
-  - [ ] Update Collect and Analyze structs to include new types
+- [x] Create API Types
+  - [x] Add ImageSignatures collector type in collector_shared.go
+  - [x] Add ImageSignatures analyzer type in analyzer_shared.go
+  - [x] Update Collect and Analyze structs to include new types
 
-- [ ] Add Registration Code
-  - [ ] Ensure types are properly registered
-  - [ ] Update deepcopy generation
+- [x] Add Registration Code
+  - [x] Ensure types are properly registered
+  - [x] Update deepcopy generation
 
 ## Phase 2: Collector Implementation
 
-- [ ] Basic Collector Structure
-  - [ ] Create pkg/collect/image_signatures.go
-  - [ ] Implement interface methods (Title, IsExcluded, Collect)
+- [x] Basic Collector Structure
+  - [x] Create pkg/collect/image_signatures.go
+  - [x] Implement interface methods (Title, IsExcluded, Collect)
 
 - [ ] Registry Authentication
   - [ ] Reuse registry.go auth methods

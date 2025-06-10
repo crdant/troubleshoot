@@ -112,6 +112,8 @@ func GetCollector(collector *troubleshootv1beta2.Collect, bundlePath string, nam
 		return &CollectLonghorn{collector.Longhorn, bundlePath, namespace, clientConfig, client, ctx, RBACErrors}, true
 	case collector.RegistryImages != nil:
 		return &CollectRegistry{collector.RegistryImages, bundlePath, namespace, clientConfig, client, ctx, RBACErrors}, true
+	case collector.ImageSignatures != nil:
+		return &CollectImageSignatures{collector.ImageSignatures, bundlePath, namespace, clientConfig, client, ctx, RBACErrors}, true
 	case collector.Sysctl != nil:
 		return &CollectSysctl{collector.Sysctl, bundlePath, namespace, clientConfig, client, ctx, RBACErrors}, true
 	case collector.Certificates != nil:
@@ -205,6 +207,9 @@ func getCollectorName(c interface{}) string {
 		name = v.Collector.CollectorName
 	case *CollectRegistry:
 		collector = "registry-images"
+		name = v.Collector.CollectorName
+	case *CollectImageSignatures:
+		collector = "image-signatures"
 		name = v.Collector.CollectorName
 	case *CollectSysctl:
 		collector = "sysctl"
