@@ -17,9 +17,9 @@
 
 ## Phase 2: Collector Implementation
 
-- [ ] Basic Collector Structure
-  - [ ] Create pkg/collect/image_signatures.go
-  - [ ] Implement interface methods (Title, IsExcluded, Collect)
+- [x] Basic Collector Structure
+  - [x] Create pkg/collect/image_signatures.go
+  - [x] Implement interface methods (Title, IsExcluded, Collect)
 
 - [ ] Registry Authentication
   - [ ] Reuse registry.go auth methods
