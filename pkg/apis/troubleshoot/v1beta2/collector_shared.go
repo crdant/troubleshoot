@@ -265,6 +265,13 @@ type RegistryImages struct {
 	ImagePullSecrets *ImagePullSecrets `json:"imagePullSecret,omitempty" yaml:"imagePullSecret,omitempty"`
 }
 
+type ImageSignatures struct {
+	CollectorMeta    `json:",inline" yaml:",inline"`
+	Images           []string          `json:"images" yaml:"images"`
+	Namespace        string            `json:"namespace" yaml:"namespace"`
+	ImagePullSecrets *ImagePullSecrets `json:"imagePullSecret,omitempty" yaml:"imagePullSecret,omitempty"`
+}
+
 type Certificates struct {
 	CollectorMeta `json:",inline" yaml:",inline"`
 	Secrets       []CertificateSource `json:"secrets,omitempty" yaml:"secrets,omitempty"`
@@ -339,6 +346,7 @@ type Collect struct {
 	Ceph             *Ceph             `json:"ceph,omitempty" yaml:"ceph,omitempty"`
 	Longhorn         *Longhorn         `json:"longhorn,omitempty" yaml:"longhorn,omitempty"`
 	RegistryImages   *RegistryImages   `json:"registryImages,omitempty" yaml:"registryImages,omitempty"`
+	ImageSignatures  *ImageSignatures  `json:"imageSignatures,omitempty" yaml:"imageSignatures,omitempty"`
 	Sysctl           *Sysctl           `json:"sysctl,omitempty" yaml:"sysctl,omitempty"`
 	Certificates     *Certificates     `json:"certificates,omitempty" yaml:"certificates,omitempty"`
 	Helm             *Helm             `json:"helm,omitempty" yaml:"helm,omitempty"`
@@ -564,6 +572,21 @@ func (c *Collect) AccessReviewSpecs(overrideNS string) []authorizationv1.SelfSub
 			},
 			NonResourceAttributes: nil,
 		})
+	} else if c.ImageSignatures != nil &&
+		c.ImageSignatures.ImagePullSecrets != nil &&
+		c.ImageSignatures.ImagePullSecrets.Data == nil {
+		result = append(result, authorizationv1.SelfSubjectAccessReviewSpec{
+			ResourceAttributes: &authorizationv1.ResourceAttributes{
+				Namespace:   pickNamespaceOrDefault(c.ImageSignatures.Namespace, overrideNS),
+				Verb:        "get",
+				Group:       "",
+				Version:     "",
+				Resource:    "secrets",
+				Subresource: "",
+				Name:        c.ImageSignatures.ImagePullSecrets.Name,
+			},
+			NonResourceAttributes: nil,
+		})
 	} else if c.Sysctl != nil {
 		// TODO
 	}
@@ -660,6 +683,10 @@ func (c *Collect) GetName() string {
 	if c.RegistryImages != nil {
 		collector = "registry-images"
 		name = c.RegistryImages.CollectorName
+	}
+	if c.ImageSignatures != nil {
+		collector = "image-signatures"
+		name = c.ImageSignatures.CollectorName
 	}
 	if c.Sysctl != nil {
 		collector = "sysctl"
