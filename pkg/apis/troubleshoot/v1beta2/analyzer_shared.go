@@ -221,6 +221,12 @@ type RegistryImagesAnalyze struct {
 	CollectorName string     `json:"collectorName" yaml:"collectorName"`
 }
 
+type ImageSignaturesAnalyze struct {
+	AnalyzeMeta   `json:",inline" yaml:",inline"`
+	Outcomes      []*Outcome `json:"outcomes" yaml:"outcomes"`
+	CollectorName string     `json:"collectorName" yaml:"collectorName"`
+}
+
 type SysctlAnalyze struct {
 	AnalyzeMeta `json:",inline" yaml:",inline"`
 	Outcomes    []*Outcome `json:"outcomes" yaml:"outcomes"`
@@ -299,6 +305,7 @@ type Analyze struct {
 	Velero                   *VeleroAnalyze            `json:"velero,omitempty" yaml:"velero,omitempty"`
 	Longhorn                 *LonghornAnalyze          `json:"longhorn,omitempty" yaml:"longhorn,omitempty"`
 	RegistryImages           *RegistryImagesAnalyze    `json:"registryImages,omitempty" yaml:"registryImages,omitempty"`
+	ImageSignatures          *ImageSignaturesAnalyze   `json:"imageSignatures,omitempty" yaml:"imageSignatures,omitempty"`
 	WeaveReport              *WeaveReportAnalyze       `json:"weaveReport,omitempty" yaml:"weaveReport,omitempty"`
 	Sysctl                   *SysctlAnalyze            `json:"sysctl,omitempty" yaml:"sysctl,omitempty"`
 	ClusterResource          *ClusterResource          `json:"clusterResource,omitempty" yaml:"clusterResource,omitempty"`
