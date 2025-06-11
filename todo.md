@@ -21,9 +21,9 @@
   - [x] Create pkg/collect/image_signatures.go
   - [x] Implement interface methods (Title, IsExcluded, Collect)
 
-- [ ] Registry Authentication
-  - [ ] Reuse registry.go auth methods
-  - [ ] Test connection to registries
+- [x] Registry Authentication
+  - [x] Reuse registry.go auth methods
+  - [x] Test connection to registries
 
 - [ ] Signature Retrieval
   - [ ] Add methods to fetch signatures using Cosign
