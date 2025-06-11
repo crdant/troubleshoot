@@ -12,11 +12,11 @@ import (
 
 func TestGetImageAuthConfig_ImageSignatures(t *testing.T) {
 	tests := []struct {
-		name        string
+		name            string
 		imageSignatures *troubleshootv1beta2.ImageSignatures
-		imageName   string
-		expectAuth  bool
-		expectError bool
+		imageName       string
+		expectAuth      bool
+		expectError     bool
 	}{
 		{
 			name: "no image pull secrets",
