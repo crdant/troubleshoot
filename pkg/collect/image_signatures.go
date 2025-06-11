@@ -10,7 +10,9 @@ import (
 	"github.com/containers/image/v5/docker/reference"
 	"github.com/containers/image/v5/transports/alltransports"
 	"github.com/containers/image/v5/types"
+	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/pkg/errors"
+	"github.com/sigstore/cosign/v2/pkg/cosign"
 	troubleshootv1beta2 "github.com/replicatedhq/troubleshoot/pkg/apis/troubleshoot/v1beta2"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -152,21 +154,31 @@ func (c *CollectImageSignatures) Collect(progressChan chan<- interface{}) (Colle
 			continue
 		}
 
-		// TODO: Implement actual signature collection using Cosign
-		// For now, we'll return a placeholder structure that indicates the pipeline is working
-		authStatus := "no authentication"
-		if authConfig != nil {
-			authStatus = "authenticated"
+		// Fetch signatures using Cosign
+		sigInfos, err := fetchImageSignatures(c.Context, imageRef, sysCtx)
+		if err != nil {
+			klog.Errorf("failed to fetch signatures for %s: %v", image, err)
+			imageData.Error = fmt.Sprintf("failed to fetch signatures: %v", err)
+			signatureInfo.Images = append(signatureInfo.Images, imageData)
+			continue
 		}
-		imageData.Signatures = []Signature{
-			{
-				Verified:  false,
-				Signature: "",
-				Error:     fmt.Sprintf("signature collection not yet implemented (auth status: %s)", authStatus),
-			},
+
+		// Format signature data for JSON output
+		imageData.Signatures = formatSignatureData(sigInfos)
+
+		// If no signatures found, add a message indicating that
+		if len(imageData.Signatures) == 0 {
+			imageData.Signatures = []Signature{
+				{
+					Verified:  false,
+					Signature: "",
+					Error:     "no signatures found for this image",
+				},
+			}
 		}
 
 		signatureInfo.Images = append(signatureInfo.Images, imageData)
+		klog.V(2).Infof("Processed signatures for image %s: found %d signatures", image, len(imageData.Signatures))
 	}
 
 	b, err := json.MarshalIndent(signatureInfo, "", "  ")
@@ -216,6 +228,13 @@ func getImageAuthConfigForSignatures(namespace string, clientConfig *rest.Config
 	}
 
 	return nil, errors.New("image pull secret spec is not valid")
+}
+
+// SignatureInfo represents signature information retrieved from Cosign
+type SignatureInfo struct {
+	Signature string `json:"signature"`
+	Verified  bool   `json:"verified"`
+	Error     string `json:"error,omitempty"`
 }
 
 // createSystemContextForSignatures creates a system context with authentication for signature operations
@@ -328,4 +347,60 @@ func isAirGappedRegistry(image string) bool {
 	}
 
 	return false
+}
+
+// fetchImageSignatures retrieves signatures for an image using Cosign
+func fetchImageSignatures(ctx context.Context, imageRef types.ImageReference, sysCtx *types.SystemContext) ([]SignatureInfo, error) {
+	var signatures []SignatureInfo
+
+	// Extract the image reference as a string for Cosign
+	imageName := imageRef.DockerReference().String()
+	
+	klog.V(4).Infof("Fetching signatures for image: %s", imageName)
+
+	// Parse the image reference for the go-containerregistry library
+	ref, err := name.ParseReference(imageName)
+	if err != nil {
+		return signatures, errors.Wrap(err, "failed to parse image reference")
+	}
+
+	// Attempt to fetch signatures using Cosign
+	// Note: We use FetchSignaturesForReference which is the public API
+	signedPayloads, err := cosign.FetchSignaturesForReference(ctx, ref)
+	if err != nil {
+		klog.V(2).Infof("No signatures found or error fetching for %s: %v", imageName, err)
+		// Return empty slice instead of error - many images don't have signatures
+		return signatures, nil
+	}
+
+	// Process each signed payload
+	for i, payload := range signedPayloads {
+		sigInfo := SignatureInfo{
+			Signature: string(payload.Payload),
+			Verified:  false, // We're only collecting, not verifying yet
+		}
+
+		if len(payload.Payload) == 0 {
+			sigInfo.Error = "empty signature payload"
+		}
+
+		signatures = append(signatures, sigInfo)
+		klog.V(4).Infof("Found signature %d for image %s (length: %d bytes)", i+1, imageName, len(payload.Payload))
+	}
+
+	klog.V(2).Infof("Found %d signatures for image %s", len(signatures), imageName)
+	return signatures, nil
+}
+
+// formatSignatureData converts SignatureInfo slice to Signature slice for JSON output
+func formatSignatureData(sigInfos []SignatureInfo) []Signature {
+	signatures := make([]Signature, len(sigInfos))
+	for i, info := range sigInfos {
+		signatures[i] = Signature{
+			Signature: info.Signature,
+			Verified:  info.Verified,
+			Error:     info.Error,
+		}
+	}
+	return signatures
 }
