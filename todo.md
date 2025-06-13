@@ -25,14 +25,14 @@
   - [x] Reuse registry.go auth methods
   - [x] Test connection to registries
 
-- [ ] Signature Retrieval
-  - [ ] Add methods to fetch signatures using Cosign
-  - [ ] Format and store signature data (JSON)
+- [x] Signature Retrieval
+  - [x] Add methods to fetch signatures using Cosign
+  - [x] Format and store signature data (JSON)
 
-- [ ] Error Handling
-  - [ ] Handle registry errors
-  - [ ] Handle missing signatures
-  - [ ] Support air-gapped environments
+- [x] Error Handling
+  - [x] Handle registry errors
+  - [x] Handle missing signatures
+  - [x] Support air-gapped environments
 
 ## Phase 3: Analyzer Implementation
 
