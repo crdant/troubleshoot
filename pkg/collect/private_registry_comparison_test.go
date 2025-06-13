@@ -41,8 +41,8 @@ func TestPrivateRegistryParity(t *testing.T) {
 		expectSimilar bool // Whether both collectors should behave similarly
 	}{
 		{
-			name:   "private registry with kubernetes secret",
-			images: []string{"private-registry.io/user/app:latest"},
+			name:       "private registry with kubernetes secret",
+			images:     []string{"private-registry.io/user/app:latest"},
 			secretName: "private-registry-secret",
 			secretData: map[string][]byte{
 				corev1.DockerConfigJsonKey: []byte(dockerConfigJSON),
@@ -51,8 +51,8 @@ func TestPrivateRegistryParity(t *testing.T) {
 			expectSimilar: true,
 		},
 		{
-			name:   "GCR private registry",
-			images: []string{"gcr.io/project/app:latest"},
+			name:       "GCR private registry",
+			images:     []string{"gcr.io/project/app:latest"},
 			secretName: "gcr-secret",
 			secretData: map[string][]byte{
 				corev1.DockerConfigJsonKey: []byte(dockerConfigJSON),
@@ -61,8 +61,8 @@ func TestPrivateRegistryParity(t *testing.T) {
 			expectSimilar: true,
 		},
 		{
-			name:   "mixed public and private images",
-			images: []string{"nginx:latest", "private-registry.io/user/app:latest"},
+			name:       "mixed public and private images",
+			images:     []string{"nginx:latest", "private-registry.io/user/app:latest"},
 			secretName: "private-registry-secret",
 			secretData: map[string][]byte{
 				corev1.DockerConfigJsonKey: []byte(dockerConfigJSON),
@@ -172,17 +172,17 @@ func TestPrivateRegistryAuthConfigParity(t *testing.T) {
 	registryCollector := &troubleshootv1beta2.RegistryImages{
 		ImagePullSecrets: imagePullSecrets,
 	}
-	
+
 	registryAuthConfig, err := getImageAuthConfig("default", &rest.Config{}, registryCollector, imageRef)
 	if err != nil {
 		t.Errorf("Registry collector auth config failed: %v", err)
 	}
 
-	// Test image signatures collector auth config  
+	// Test image signatures collector auth config
 	signaturesCollector := &troubleshootv1beta2.ImageSignatures{
 		ImagePullSecrets: imagePullSecrets,
 	}
-	
+
 	signaturesAuthConfig, err := getImageAuthConfigGeneric("default", &rest.Config{}, signaturesCollector, imageRef)
 	if err != nil {
 		t.Errorf("Signatures collector auth config failed: %v", err)
@@ -199,9 +199,9 @@ func TestPrivateRegistryAuthConfigParity(t *testing.T) {
 		return
 	}
 
-	if registryAuthConfig.username != signaturesAuthConfig.username || 
-	   registryAuthConfig.password != signaturesAuthConfig.password {
-		t.Errorf("Auth configs differ: registry={%s:%s}, signatures={%s:%s}", 
+	if registryAuthConfig.username != signaturesAuthConfig.username ||
+		registryAuthConfig.password != signaturesAuthConfig.password {
+		t.Errorf("Auth configs differ: registry={%s:%s}, signatures={%s:%s}",
 			registryAuthConfig.username, registryAuthConfig.password,
 			signaturesAuthConfig.username, signaturesAuthConfig.password)
 	}
