@@ -8,7 +8,7 @@ import (
 
 func TestImageSignatures_CollectorMeta(t *testing.T) {
 	tests := []struct {
-		name     string
+		name      string
 		collector *ImageSignatures
 		expected  string
 	}{
