@@ -86,7 +86,7 @@ func (c *CollectImageSignatures) Collect(progressChan chan<- interface{}) (Colle
 		}
 
 		// Handle authentication configuration with better error categorization
-		authConfig, err := getImageAuthConfigForSignatures(c.Namespace, c.ClientConfig, c.Collector, imageRef)
+		authConfig, err := getImageAuthConfigGeneric(c.Namespace, c.ClientConfig, c.Collector, imageRef)
 		if err != nil {
 			klog.Errorf("failed to get auth config for %s: %v", image, err)
 			// Categorize auth errors for better debugging
@@ -195,39 +195,6 @@ func (c *CollectImageSignatures) Collect(progressChan chan<- interface{}) (Colle
 	output.SaveResult(c.BundlePath, fmt.Sprintf("image-signatures/%s.json", collectorName), bytes.NewBuffer(b))
 
 	return output, nil
-}
-
-// getImageAuthConfigForSignatures extracts authentication configuration for image signatures
-// This is adapted from the getImageAuthConfig function in registry.go
-func getImageAuthConfigForSignatures(namespace string, clientConfig *rest.Config, signaturesCollector *troubleshootv1beta2.ImageSignatures, imageRef types.ImageReference) (*registryAuthConfig, error) {
-	if signaturesCollector.ImagePullSecrets == nil {
-		return nil, nil
-	}
-
-	if signaturesCollector.ImagePullSecrets.Data != nil {
-		config, err := getImageAuthConfigFromData(imageRef, signaturesCollector.ImagePullSecrets)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to get auth from data")
-		}
-		return config, nil
-	}
-
-	if signaturesCollector.ImagePullSecrets.Name != "" {
-		collectorNamespace := signaturesCollector.Namespace
-		if collectorNamespace == "" {
-			collectorNamespace = namespace
-		}
-		if collectorNamespace == "" {
-			collectorNamespace = "default"
-		}
-		config, err := getImageAuthConfigFromSecret(clientConfig, imageRef, signaturesCollector.ImagePullSecrets, collectorNamespace)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to get auth from secret")
-		}
-		return config, nil
-	}
-
-	return nil, errors.New("image pull secret spec is not valid")
 }
 
 // SignatureInfo represents signature information retrieved from Cosign

@@ -98,7 +98,7 @@ func TestGetImageAuthConfig_ImageSignatures(t *testing.T) {
 				t.Fatalf("Failed to parse image name: %v", err)
 			}
 
-			authConfig, err := getImageAuthConfigForSignatures("default", &rest.Config{}, tt.imageSignatures, imageRef)
+			authConfig, err := getImageAuthConfigGeneric("default", &rest.Config{}, tt.imageSignatures, imageRef)
 
 			if tt.expectError {
 				if err == nil {

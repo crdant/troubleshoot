@@ -31,3 +31,13 @@ type PodSpecRunner interface {
 }
 
 var _ PodSpecRunner = &v1beta2.RunPod{}
+
+// AuthConfigProvider is an interface for collectors that need registry authentication
+type AuthConfigProvider interface {
+	GetImagePullSecrets() *v1beta2.ImagePullSecrets
+	GetNamespace() string
+}
+
+// Ensure both registry and image signatures collectors implement this interface
+var _ AuthConfigProvider = &v1beta2.RegistryImages{}
+var _ AuthConfigProvider = &v1beta2.ImageSignatures{}
