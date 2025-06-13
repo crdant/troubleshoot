@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/containers/image/v5/transports/alltransports"
-	"github.com/containers/image/v5/types"
 	troubleshootv1beta2 "github.com/replicatedhq/troubleshoot/pkg/apis/troubleshoot/v1beta2"
 )
 
