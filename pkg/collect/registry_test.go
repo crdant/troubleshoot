@@ -8,6 +8,7 @@ import (
 	"github.com/containers/image/v5/transports/alltransports"
 	"github.com/replicatedhq/troubleshoot/pkg/apis/troubleshoot/v1beta2"
 	"github.com/stretchr/testify/assert"
+	"k8s.io/client-go/rest"
 )
 
 func TestGetImageAuthConfigFromData(t *testing.T) {
@@ -75,4 +76,37 @@ func TestGetImageAuthConfigFromData(t *testing.T) {
 			assert.Equal(t, test.expectedPassword, authConfig.password)
 		})
 	}
+}
+
+func TestGetImageAuthConfig_BackwardCompatibility(t *testing.T) {
+	// Test that the wrapper function still works with RegistryImages after refactoring
+	dockerConfigJSON := `{
+		"auths": {
+			"private-registry.io": {
+				"username": "testuser",
+				"password": "testpass"
+			}
+		}
+	}`
+
+	registryCollector := &v1beta2.RegistryImages{
+		Images: []string{"private-registry.io/user/app:latest"},
+		ImagePullSecrets: &v1beta2.ImagePullSecrets{
+			Data: map[string]string{
+				".dockerconfigjson": base64.StdEncoding.EncodeToString([]byte(dockerConfigJSON)),
+			},
+			SecretType: "kubernetes.io/dockerconfigjson",
+		},
+		Namespace: "default",
+	}
+
+	imageRef, err := alltransports.ParseImageName("docker://private-registry.io/user/app:latest")
+	assert.NoError(t, err)
+
+	// This calls the wrapper function which should use the generic function internally
+	authConfig, err := getImageAuthConfig("default", &rest.Config{}, registryCollector, imageRef)
+	assert.NoError(t, err)
+	assert.NotNil(t, authConfig)
+	assert.Equal(t, "testuser", authConfig.username)
+	assert.Equal(t, "testpass", authConfig.password)
 }
