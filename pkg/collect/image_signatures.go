@@ -134,7 +134,7 @@ func (c *CollectImageSignatures) Collect(progressChan chan<- interface{}) (Colle
 			} else {
 				registryError = fmt.Sprintf("registry access failed: %v", err)
 			}
-			
+
 			// For air-gapped environments, we still try to collect what we can
 			if isAirGappedRegistry(image) {
 				klog.V(2).Infof("Detected air-gapped registry for %s, collecting basic info", image)
@@ -260,20 +260,20 @@ func validateRegistryAccess(ctx context.Context, imageRef types.ImageReference, 
 	// For now, we'll do a simple validation by trying to create a context
 	// In a full implementation, this would attempt to access the registry
 	// but since we're not actually pulling images yet, we'll simulate various scenarios
-	
+
 	// Extract registry hostname for analysis
 	dockerRef := imageRef.DockerReference()
 	if dockerRef == nil {
 		return errors.New("not a docker reference")
 	}
-	
+
 	var hostname string
 	if named, ok := dockerRef.(reference.Named); ok {
 		hostname = reference.Domain(named)
 	} else {
 		hostname = dockerRef.String()
 	}
-	
+
 	// Simulate different registry access scenarios for testing
 	if strings.Contains(hostname, "timeout-registry") {
 		return errors.New("connection timeout")
@@ -284,13 +284,13 @@ func validateRegistryAccess(ctx context.Context, imageRef types.ImageReference, 
 	if strings.Contains(hostname, "badssl") || strings.Contains(hostname, "invalid-cert") {
 		return errors.New("certificate verify failed")
 	}
-	
+
 	// For localhost and private registries, assume they're accessible in air-gapped environments
 	if isAirGappedRegistry(hostname) {
 		klog.V(4).Infof("Air-gapped registry detected: %s", hostname)
 		return nil
 	}
-	
+
 	// In real implementation, this would make an actual registry call
 	// For now, assume success for most cases
 	return nil
@@ -309,23 +309,23 @@ func isAirGappedRegistry(image string) bool {
 		".local:",
 		".corp:",
 		".company.com",
-		"10.",  // Private IP ranges
+		"10.", // Private IP ranges
 		"192.168.",
 		"172.",
 	}
-	
+
 	for _, pattern := range airGappedPatterns {
 		if strings.Contains(image, pattern) {
 			return true
 		}
 	}
-	
+
 	// Check for common internal domain patterns
-	if strings.Contains(image, ".internal") || 
-	   strings.Contains(image, ".local") ||
-	   strings.Contains(image, ".corp") {
+	if strings.Contains(image, ".internal") ||
+		strings.Contains(image, ".local") ||
+		strings.Contains(image, ".corp") {
 		return true
 	}
-	
+
 	return false
 }

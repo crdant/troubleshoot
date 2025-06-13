@@ -197,7 +197,7 @@ func TestCollectImageSignatures_ErrorHandling(t *testing.T) {
 				Context:      context.Background(),
 			},
 			expectImageErrors: map[string]bool{
-				"":                               true,
+				"":                                   true,
 				"registry.io/user/image:tag:invalid": true,
 				"valid-image:latest":                 false,
 			},
@@ -300,7 +300,7 @@ func TestCollectImageSignatures_ErrorHandling(t *testing.T) {
 				Context:      context.Background(),
 			},
 			expectImageErrors: map[string]bool{
-				"localhost:5000/internal/app:latest":         false,
+				"localhost:5000/internal/app:latest":     false,
 				"internal-registry.company.com/app:v1.0": false,
 			},
 		},
