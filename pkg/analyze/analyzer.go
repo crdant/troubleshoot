@@ -260,6 +260,8 @@ func GetAnalyzer(analyzer *troubleshootv1beta2.Analyze) Analyzer {
 		return &AnalyzeNodeMetrics{analyzer: analyzer.NodeMetrics}
 	case analyzer.HTTP != nil:
 		return &AnalyzeHTTPAnalyze{analyzer: analyzer.HTTP}
+	case analyzer.ImageSignatures != nil:
+		return &AnalyzeImageSignatures{analyzer: analyzer.ImageSignatures}
 	default:
 		return nil
 	}

@@ -36,9 +36,9 @@
 
 ## Phase 3: Analyzer Implementation
 
-- [ ] Basic Analyzer Structure
-  - [ ] Create pkg/analyze/image_signatures.go
-  - [ ] Implement interface methods (Title, IsExcluded, Analyze)
+- [x] Basic Analyzer Structure
+  - [x] Create pkg/analyze/image_signatures.go
+  - [x] Implement interface methods (Title, IsExcluded, Analyze)
 
 - [ ] Verification Logic
   - [ ] Add methods to verify signatures with Cosign
