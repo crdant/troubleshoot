@@ -735,3 +735,21 @@ func GetCollector(collector *Collect) interface{} {
 
 	return nil
 }
+
+// AuthConfigProvider interface implementation for RegistryImages
+func (r *RegistryImages) GetImagePullSecrets() *ImagePullSecrets {
+	return r.ImagePullSecrets
+}
+
+func (r *RegistryImages) GetNamespace() string {
+	return r.Namespace
+}
+
+// AuthConfigProvider interface implementation for ImageSignatures
+func (i *ImageSignatures) GetImagePullSecrets() *ImagePullSecrets {
+	return i.ImagePullSecrets
+}
+
+func (i *ImageSignatures) GetNamespace() string {
+	return i.Namespace
+}

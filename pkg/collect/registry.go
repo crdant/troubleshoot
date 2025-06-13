@@ -148,27 +148,33 @@ func imageExists(namespace string, clientConfig *rest.Config, registryCollector 
 }
 
 func getImageAuthConfig(namespace string, clientConfig *rest.Config, registryCollector *troubleshootv1beta2.RegistryImages, imageRef types.ImageReference) (*registryAuthConfig, error) {
-	if registryCollector.ImagePullSecrets == nil {
+	return getImageAuthConfigGeneric(namespace, clientConfig, registryCollector, imageRef)
+}
+
+// getImageAuthConfigGeneric works with any collector that implements AuthConfigProvider
+func getImageAuthConfigGeneric(namespace string, clientConfig *rest.Config, authProvider AuthConfigProvider, imageRef types.ImageReference) (*registryAuthConfig, error) {
+	imagePullSecrets := authProvider.GetImagePullSecrets()
+	if imagePullSecrets == nil {
 		return nil, nil
 	}
 
-	if registryCollector.ImagePullSecrets.Data != nil {
-		config, err := getImageAuthConfigFromData(imageRef, registryCollector.ImagePullSecrets)
+	if imagePullSecrets.Data != nil {
+		config, err := getImageAuthConfigFromData(imageRef, imagePullSecrets)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to get auth from data")
 		}
 		return config, nil
 	}
 
-	if registryCollector.ImagePullSecrets.Name != "" {
-		collectorNamespace := registryCollector.Namespace
+	if imagePullSecrets.Name != "" {
+		collectorNamespace := authProvider.GetNamespace()
 		if collectorNamespace == "" {
 			collectorNamespace = namespace
 		}
 		if collectorNamespace == "" {
 			collectorNamespace = "default"
 		}
-		config, err := getImageAuthConfigFromSecret(clientConfig, imageRef, registryCollector.ImagePullSecrets, collectorNamespace)
+		config, err := getImageAuthConfigFromSecret(clientConfig, imageRef, imagePullSecrets, collectorNamespace)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to get auth from secret")
 		}
